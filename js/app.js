@@ -81,6 +81,16 @@ var getUnanswered = function(tags) {
 	});
 };
 
+function showUser(user) {
+	var userContainer = $(".templates .user").clone();
+	userContainer.find(".user-name").text(user.user.display_name);
+	userContainer.find(".reputation").text(user.user.reputation);
+	userContainer.find(".image #profile").attr("src",user.user.profile_image);
+	userContainer.find(".link #profile-link").attr("href", user.user.link);
+	// console.log(userContainer);
+    
+	return userContainer;
+}
 
 var getAnswerers = function(tags) {
 	
@@ -92,21 +102,20 @@ var getAnswerers = function(tags) {
 	};
 	
 	$.ajax({
-		url: "http://api.stackexchange.com/2.2/top-answerers-on-tags/all_time",
-		data: request,
+		url: 'http://api.stackexchange.com/2.2/tags/'+tags+'/top-answerers/all_time?site=stackoverflow',
 		dataType: "jsonp",//use jsonp to avoid cross origin issues
 		type: "GET",
 	})
 	
 	.done(function(result){ //this waits for the ajax to return with a succesful promise object
-		var searchResults = showSearchResults(request.tagged, result.items.length);
+		var searchResults = showSearchResults(tags, result.items.length);//tags.items.length
 
 		$('.search-results').html(searchResults);
 		//$.each is a higher order function. It takes an array and a function as an argument.
 		//The function is executed once for each item in the array.
 		$.each(result.items, function(i, item) {
-			var question = showQuestion(item);
-			$('.results').append(question);
+			var user = showUser(item);
+			$('.results').append(user);
 		});
 	})
 	
@@ -132,7 +141,7 @@ $(document).ready( function() {
 		getUnanswered(tags);
 	});
 	
-	$('.inspiration-getter').submit(function(){
+	$('.inspiration-getter').submit(function(e){
 		
 		e.preventDefault();
 		$('.results').html('');
@@ -140,4 +149,6 @@ $(document).ready( function() {
 		getAnswerers(tags);
 		
 	});
+	
+	return false;
 });
